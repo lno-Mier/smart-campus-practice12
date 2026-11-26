@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Campus - Room Availability Checker</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif; background: #f3f5f9; color: #1f2933; }
+    header { background: #1f3a68; color: #fff; padding: 14px 24px; }
+    header h1 { margin: 0; font-size: 20px; }
+    header p { margin: 2px 0 0; font-size: 14px; opacity: .9; }
+    main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 940px; margin: 20px auto; padding: 0 12px; align-items: start; }
+    .card { background: #fff; border: 1px solid #dde1e7; border-radius: 8px; padding: 18px; }
+    h2 { margin: 0 0 12px; font-size: 16px; }
+    label { display: block; font-weight: 600; font-size: 14px; margin: 10px 0 4px; }
+    input[type=datetime-local], input[type=number] { width: 100%; padding: 9px 10px; font-size: 16px; border: 1px solid #b8c1cc; border-radius: 5px; }
+    .check { display: flex; align-items: center; gap: 8px; margin: 14px 0; }
+    .check label { margin: 0; }
+    button { width: 100%; padding: 10px; font-size: 16px; color: #fff; background: #1f3a68; border: 0; border-radius: 5px; cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #8fb3ff; outline-offset: 1px; }
+    #result { margin-top: 16px; padding: 10px 12px; border-radius: 5px; border: 1px solid transparent; }
+    #result:empty { display: none; }
+    #result.ok { background: #e8f5ec; border-color: #2e7d4f; color: #1e6b3a; }
+    #result.bad { background: #fdecea; border-color: #c62828; color: #b71c1c; }
+    #result strong { display: block; font-size: 18px; }
+    #result code { display: block; margin-top: 4px; font-size: 13px; color: #555; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid #dde1e7; }
+    .note { font-size: 13px; color: #5f6b7a; margin-top: 12px; }
+    @media (max-width: 720px) { main { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Smart Campus - Room Availability Checker</h1>
+    <p>Room B-204 (fictional)</p>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Check a time slot</h2>
+      <form id="slot" novalidate>
+        <label for="start">Start time</label>
+        <input id="start" type="datetime-local" required>
+        <label for="duration">Duration (minutes, 1-120)</label>
+        <input id="duration" type="number" min="1" max="120" step="1" value="60">
+        <div class="check">
+          <input id="blocked" type="checkbox">
+          <label for="blocked">Room is blocked (maintenance)</label>
+        </div>
+        <button id="check" type="submit">Check availability</button>
+      </form>
+      <div id="result" role="status" aria-live="polite"></div>
+    </section>
+    <section class="card">
+      <h2>Existing bookings (read-only, fictional)</h2>
+      <table id="bookings">
+        <thead><tr><th>ID</th><th>Date</th><th>Time</th><th>Title</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="note" id="now-note"></p>
+    </section>
+  </main>
+  <script src="rules.js"></script>
+  <script>
+    'use strict';
+    const pad = n => String(n).padStart(2, '0');
+    // "Now" = browser clock. ?now=YYYY-MM-DDTHH:MM fixes the clock for repeatable tests.
+    const fixedNow = new URLSearchParams(location.search).get('now');
+    function currentNow() {
+      if (fixedNow && RoomRules.toMinutes(fixedNow) !== null) return fixedNow;
+      const d = new Date();
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+    function showNow(now) {
+      document.getElementById('now-note').textContent =
+        `Checks never change this list (AC5). Now: ${now.replace('T', ' ')}${now === fixedNow ? ' (test clock)' : ''}`;
+    }
+    // UI display only: every value is written with textContent (no innerHTML -> no XSS sink).
+    function renderBookings() {
+      const body = document.querySelector('#bookings tbody');
+      for (const b of RoomRules.BOOKINGS) {
+        const tr = document.createElement('tr');
+        for (const text of [b.id, b.start.slice(0, 10), `${b.start.slice(11)}-${b.end.slice(11)}`, b.title]) {
+          const td = document.createElement('td');
+          td.textContent = text;
+          tr.appendChild(td);
+        }
+        body.appendChild(tr);
+      }
+    }
+    function renderResult(r) {
+      const box = document.getElementById('result');
+      box.replaceChildren();
+      box.className = r.available ? 'ok' : 'bad';
+      const title = document.createElement('strong');
+      title.textContent = r.available ? 'Available' : (r.valid ? 'Unavailable' : 'Input error');
+      const msg = document.createElement('span');
+      msg.textContent = r.message;
+      const code = document.createElement('code');
+      code.textContent = `available=${r.available} reason=${r.reason}`;
+      box.append(title, msg, code);
+    }
+    document.getElementById('slot').addEventListener('submit', event => {
+      event.preventDefault();
+      const now = currentNow();
+      const input = {
+        start: document.getElementById('start').value,
+        duration: document.getElementById('duration').value,
+        blocked: document.getElementById('blocked').checked
+      };
+      renderResult(RoomRules.checkAvailability(input, RoomRules.BOOKINGS, now));
+      showNow(now);
+    });
+    renderBookings();
+    showNow(currentNow());
+  </script>
+</body>
+</html>

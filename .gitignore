@@ -1,0 +1,8 @@
+node_modules/
+# files Node-RED writes into its user directory at runtime
+low-code/.config.*.json
+low-code/.flows.json.backup
+low-code/flows_cred.json
+low-code/lib/
+low-code/context/
+~$*.docx

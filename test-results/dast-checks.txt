@@ -1,0 +1,2 @@
+XSS probe: browser kept value="", result="Input error", injected elements=0, dialogs=0
+Node-RED GET /flows without credentials -> HTTP 200, nodes exposed: 25

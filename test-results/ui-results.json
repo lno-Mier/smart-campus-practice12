@@ -1,0 +1,124 @@
+{
+  "runAt": "2026-11-26T11:46:58.512Z",
+  "codeBased": [
+    {
+      "id": "T1",
+      "decision": "Available",
+      "message": "Available: the room is free for the selected interval.",
+      "contract": "available=true reason=OK",
+      "expected": "OK",
+      "pass": true
+    },
+    {
+      "id": "T2",
+      "decision": "Unavailable",
+      "message": "Unavailable: overlaps existing booking BK-1 (09:00-10:30).",
+      "contract": "available=false reason=OVERLAP",
+      "expected": "OVERLAP",
+      "pass": true
+    },
+    {
+      "id": "T3",
+      "decision": "Unavailable",
+      "message": "Unavailable: the room is blocked (e.g. maintenance).",
+      "contract": "available=false reason=ROOM_BLOCKED",
+      "expected": "ROOM_BLOCKED",
+      "pass": true
+    },
+    {
+      "id": "T4",
+      "decision": "Input error",
+      "message": "Duration must be a whole number of minutes from 1 to 120.",
+      "contract": "available=false reason=INVALID_DURATION",
+      "expected": "INVALID_DURATION",
+      "pass": true
+    },
+    {
+      "id": "T5",
+      "decision": "Input error",
+      "message": "Duration must be a whole number of minutes from 1 to 120.",
+      "contract": "available=false reason=INVALID_DURATION",
+      "expected": "INVALID_DURATION",
+      "pass": true
+    },
+    {
+      "id": "T6",
+      "decision": "Input error",
+      "message": "Start time must be in the future.",
+      "contract": "available=false reason=START_IN_PAST",
+      "expected": "START_IN_PAST",
+      "pass": true
+    },
+    {
+      "id": "T7",
+      "decision": "Available",
+      "message": "Available: the room is free for the selected interval.",
+      "contract": "available=true reason=OK",
+      "expected": "OK",
+      "pass": true
+    },
+    {
+      "id": "T8",
+      "expected": "bookings unchanged",
+      "observed": "unchanged after 7 checks",
+      "pass": true
+    }
+  ],
+  "lowCode": [
+    {
+      "id": "T1",
+      "message": "Available: The room is free for the selected interval.",
+      "contract": "available=true reason=OK",
+      "expected": "OK",
+      "pass": true
+    },
+    {
+      "id": "T2",
+      "message": "Unavailable: Overlaps existing booking BK-1 (09:00-10:30).",
+      "contract": "available=false reason=OVERLAP",
+      "expected": "OVERLAP",
+      "pass": true
+    },
+    {
+      "id": "T3",
+      "message": "Unavailable: The room is blocked (e.g. maintenance).",
+      "contract": "available=false reason=ROOM_BLOCKED",
+      "expected": "ROOM_BLOCKED",
+      "pass": true
+    },
+    {
+      "id": "T4",
+      "message": "Input error: Duration must be a whole number of minutes from 1 to 120.",
+      "contract": "available=false reason=INVALID_DURATION",
+      "expected": "INVALID_DURATION",
+      "pass": true
+    },
+    {
+      "id": "T5",
+      "message": "Input error: Duration must be a whole number of minutes from 1 to 120.",
+      "contract": "available=false reason=INVALID_DURATION",
+      "expected": "INVALID_DURATION",
+      "pass": true
+    },
+    {
+      "id": "T6",
+      "message": "Input error: Start time must be in the future.",
+      "contract": "available=false reason=START_IN_PAST",
+      "expected": "START_IN_PAST",
+      "pass": true
+    },
+    {
+      "id": "T7",
+      "message": "Available: The room is free for the selected interval.",
+      "contract": "available=true reason=OK",
+      "expected": "OK",
+      "pass": true
+    },
+    {
+      "id": "T8",
+      "expected": "bookings unchanged",
+      "observed": "flow.bookings identical before/after 7 checks (admin API /context/flow)",
+      "pass": true
+    }
+  ]
+}

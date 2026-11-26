@@ -1,0 +1,18 @@
+  ✔ T1 valid free interval -> Available (1.0281ms)
+  ✔ T2 overlap with existing booking -> Unavailable (0.1899ms)
+  ✔ T3 blocked room -> Unavailable (0.0797ms)
+  ✔ T4 duration = 0 -> validation error (0.0637ms)
+  ✔ T5 duration = 121 -> validation error (0.065ms)
+  ✔ T6 past start time -> validation error (0.5695ms)
+  ✔ T7 adjacent non-overlapping interval -> Available (0.1123ms)
+  ✔ T8 booking data unchanged after checks (0.1253ms)
+  ✔ extra: duration 120 boundary accepted, 1 accepted (0.1118ms)
+  ✔ extra: empty / non-numeric / fractional input -> understandable error (0.1895ms)
+  ℹ tests 10
+  ℹ suites 0
+  ℹ pass 10
+  ℹ fail 0
+  ℹ cancelled 0
+  ℹ skipped 0
+  ℹ todo 0
+  ℹ duration_ms 66.3728
